@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wall #-}
+
 -- Exercise 1
 toDigitsRev :: Integer -> [Integer]
 toDigitsRev number
