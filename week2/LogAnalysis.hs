@@ -21,3 +21,33 @@ parseMessage str = case words str of
 
 parse :: String -> [LogMessage]
 parse strs = map parseMessage (lines strs)
+
+insert :: LogMessage -> MessageTree -> MessageTree
+insert (Unknown _) messageTree = messageTree
+insert logMessage@(LogMessage _ timeStamp _) messageTree = case messageTree of
+  Leaf -> Node Leaf logMessage Leaf
+  Node leftTree logMessage'@(LogMessage _ timeStamp' _) rightTree ->
+    if timeStamp < timeStamp'
+      then Node (insert logMessage leftTree) logMessage' rightTree
+      else Node leftTree logMessage' (insert logMessage rightTree)
+
+insert' :: MessageTree -> LogMessage -> MessageTree
+insert' a b = insert b a
+
+build :: [LogMessage] -> MessageTree
+build list = foldl insert' Leaf list
+
+inOrder :: MessageTree -> [LogMessage]
+inOrder Leaf = []
+inOrder (Node leftTree logMessage rightTree) =
+  inOrder leftTree ++ logMessage:inOrder rightTree
+
+pattern :: LogMessage -> Bool
+pattern (LogMessage (Error x) _ _) | x >= 50 = True
+pattern _ = False
+
+messageString :: LogMessage -> String
+messageString (LogMessage _ _ string) = string
+
+whatWentWrong :: [LogMessage] -> [String]
+whatWentWrong list = map messageString (filter pattern ((inOrder.build) list))
