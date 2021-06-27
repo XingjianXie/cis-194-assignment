@@ -29,13 +29,9 @@ point :: Bool -> Char
 point True = '*'
 point False = ' '
 
-count :: [Integer] -> Integer -> Integer
--- Count the occurrence of a number in the list
-count l x = (genericLength.filter (==x)) l
-
 counts :: [Integer] -> [Integer]
 -- Count the occurence of 0 to 9 in the list to form new list
-counts l = map (count l) [0..9]
+counts l = map (\x -> (genericLength.filter (==x)) l) [0..9]
 
 layer :: [Integer] -> Integer -> String
 -- For each layer, whether the point should be shown is judged by occurence
