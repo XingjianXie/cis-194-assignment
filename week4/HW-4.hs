@@ -1,3 +1,5 @@
+import Data.List ((\\))
+
 -- Exercise 1
 
 fun1' :: [Integer] -> Integer
@@ -47,4 +49,13 @@ myFoldl :: (a -> b -> a) -> a -> [b] -> a
 -- But I believe this is not what you really want
 myFoldl f base xs = foldr (\x -> (`f` x)) base (reverse xs)
 
+-- Exercise 4
 
+sieved :: Integer -> [Integer]
+sieved x = filter (<=x) [i + j + 2 * i * j | j <- [1..x], i <- [1..j]]
+
+rest :: Integer -> [Integer]
+rest x = [1,3..x] \\ sieved x
+
+sieveSundaram :: Integer -> [Integer]
+sieveSundaram = map ((+1).(*2)) . rest
