@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wall #-}
 import Data.List ((\\))
 
 -- Exercise 1
