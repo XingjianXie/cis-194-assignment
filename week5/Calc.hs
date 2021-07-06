@@ -1,7 +1,13 @@
 {-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+
+module Calc where
 
 import ExprT
 import Parser
+import qualified StackVM
+import qualified Data.Map as M
 
 -- Exercise 1
 
@@ -59,3 +65,52 @@ testInteger = testExp :: Maybe Integer
 testBool = testExp :: Maybe Bool
 testMM = testExp :: Maybe MinMax
 testSat = testExp :: Maybe Mod7
+
+-- Exercise 5
+
+instance Expr StackVM.Program where
+  lit = (:[]) . StackVM.PushI
+  add x y = x ++ y ++ [StackVM.Add]
+  mul x y = x ++ y ++ [StackVM.Mul]
+
+compile :: String -> Maybe StackVM.Program
+compile = parseExp lit add mul
+
+-- Exercise 6
+
+class HasVars a where
+  var :: String -> a
+
+data VarExprT = VLit Integer
+              | Var String
+              | VAdd VarExprT VarExprT
+              | VMul VarExprT VarExprT
+  deriving (Show, Eq)
+
+instance Expr VarExprT where
+  lit = VLit
+  add = VAdd
+  mul = VMul
+
+instance HasVars VarExprT where
+  var = Var
+
+instance Expr (M.Map String Integer -> Maybe Integer) where
+  lit x _ = Just x
+  add x y m = do {
+    x' <- x m; y' <- y m;
+    return (x' + y')
+  }
+  mul x y m = do {
+    x' <- x m; y' <- y m;
+    return (x' * y')
+  }
+
+instance HasVars (M.Map String Integer -> Maybe Integer) where
+  var x = M.lookup x
+
+withVars :: [(String, Integer)]
+         -> (M.Map String Integer -> Maybe Integer)
+         -> Maybe Integer
+withVars vs exp = exp $ M.fromList vs
+
